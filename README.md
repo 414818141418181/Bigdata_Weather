@@ -1,7 +1,7 @@
 # 项目背景：
 * 适用于大数据专业学生进行初级练手的一个大数据项目，主要内容是调用api接口，调用数据，通过数据清洗，数据治理以及数据可视化来进行项目的实现。
 ## 当前进度：
-* 调用api接口来进行获取数据源
+* 调用api接口来进行获取数据源,api接口来源于https://github.com/fangzesheng/free-api
 ```
 def get_data(city_code):
     urls = f"http://t.weather.sojson.com/api/weather/city/{city_code}"
