@@ -15,7 +15,7 @@ def get_data(city_code):
 
     return weather_data
 ```
-* 将初级得到的数据上传至hadoop集群使用sqoop写入本地数据库或虚拟机数据库，为后面的处理做准备，以下是处理过后的数据
+* 将初级得到的数据上传至hadoop集群
 ```
 ,date,high,low,ymd,week,sunrise,sunset,aqi,fx,fl,type,notice
 0,19,高温 35℃,低温 24℃,2023-08-19,星期六,05:30,19:06,87,南风,1级,晴,愿你拥有比阳光明媚的心情
@@ -34,4 +34,56 @@ def get_data(city_code):
 13,01,高温 30℃,低温 20℃,2023-09-01,星期五,05:42,18:47,62,北风,1级,晴,愿你拥有比阳光明媚的心情
 14,02,高温 31℃,低温 20℃,2023-09-02,星期六,05:43,18:45,47,西南风,2级,晴,愿你拥有比阳光明媚的心情
 ```
+## 数据预处理:
+* 使用mapreduce来对数据做一个初级的处理，以日期为key值，为后期数据可视化做准备
+```
+ public static class WMap extends Mapper<LongWritable, Text, Text,Sun>{
+        @Override
+        protected void map(LongWritable key, Text value, Mapper<LongWritable, Text,Text, Sun>.Context context) throws IOException, InterruptedException {
+            String lane = value.toString();
+            String[] data = lane.split(",");
+            if(key.toString().equals("0")) {
 
+            }else{
+                String ymd = data[4];
+                String sunrise =data[6];
+                String sunset = data[7];
+                Text k2 =new Text(ymd);
+                Sun v2 = new Sun(sunrise, sunset);
+                context.write(k2, v2);
+            }
+        }
+    } 
+2023-08-19      06:04   18:56
+2023-08-20      06:05   18:55
+2023-08-21      06:05   18:54
+2023-08-22      06:05   18:54
+2023-08-23      06:06   18:53
+2023-08-24      06:06   18:52
+2023-08-25      06:07   18:51
+2023-08-26      06:07   18:50
+2023-08-27      06:07   18:49
+2023-08-28      06:08   18:48
+2023-08-29      06:08   18:47
+2023-08-30      06:08   18:46
+2023-08-31      06:08   18:46
+2023-09-01      06:09   18:45
+2023-09-02      06:09   18:44
+```
+* 使用sqoop写入本地数据库,先创建数据库以及表
+```
+  CREATE DATABASE weather DEFAULT CHARACTER SET=utf8 DEFAULT COLLATE
+=utf8_general_ci;
+USE weather;
+CREATE TABLE beij (
+ date varchar(255),
+ sunrise varchar(255),
+ sunset varchar(255)
+);
+  sqoop export --connect jdbc:mysql://本机的ip地址:3306/weather?serverTimezone=UTC \
+  --username root \
+  --password 123123 \
+  --table beij  \
+  --export-dir /weather/beij/ \
+  --input-fields-terminated-by "\t"
+```
