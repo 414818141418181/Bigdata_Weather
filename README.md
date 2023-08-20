@@ -87,3 +87,38 @@ CREATE TABLE beij (
   --export-dir /weather/beij/ \
   --input-fields-terminated-by "\t"
 ```
+## 数据可视化:
+```
+def data_show(hostname,username,password,database,table_name):
+# 连接数据库
+    connection = pymysql.connect(host=hostname, user=username, password=password, database=database)
+
+# 查询数据
+    query = f"SELECT date,sunrise,sunset FROM {table_name} ORDER BY date,sunrise,sunset ASC"
+    cursor = connection.cursor()
+    cursor.execute(query)
+
+# 获取结果集
+    results = cursor.fetchall()
+
+# 准备数据
+    data_sunrise = []
+    data_sunset = []
+    xlab = []
+    for row in results:
+        xlab.append(row[0])
+        data_sunrise.append(row[1])
+        data_sunset.append(row[2])
+
+# 绘制图表
+    fig = plt.figure(figsize=(15, 8))
+    plt.plot(xlab,data_sunset)
+    plt.plot(xlab,data_sunrise)
+    plt.title('日初日落时间')
+    plt.show()
+
+# 关闭连接
+    cursor.close()
+    connection.close()
+```
+![image](https://github.com/414818141418181/Bigdata_Weather/assets/128785226/6e725c9c-4368-442b-b8a9-11761cb2dbed)
