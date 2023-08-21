@@ -196,3 +196,20 @@ public class temp {
 2023-09-01      30 ℃    20 ℃    10 ℃
 2023-09-02      31 ℃    20 ℃    11 ℃
 ```
+* 使用sqoop工具将处理好的数据上传至本地数据库
+```
+USE weather;
+CREATE TABLE tem (
+ date varchar(255),
+ high varchar(255),
+ low varchar(255),
+ differ varchar(255)
+);
+ 
+  sqoop export --connect jdbc:mysql://192.168.45.154:3306/weather?serverTimezone=UTC \
+  --username root \
+  --password 123123 \
+  --table tem  \
+  --export-dir /weather/temp/ \
+  --input-fields-terminated-by "\t" 
+```
