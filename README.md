@@ -34,7 +34,8 @@ def get_data(city_code):
 13,01,高温 30℃,低温 20℃,2023-09-01,星期五,05:42,18:47,62,北风,1级,晴,愿你拥有比阳光明媚的心情
 14,02,高温 31℃,低温 20℃,2023-09-02,星期六,05:43,18:45,47,西南风,2级,晴,愿你拥有比阳光明媚的心情
 ```
-## 数据预处理:
+### 简单的案例
+#### 数据处理:
 * 使用mapreduce来对数据做一个初级的处理，以日期为key值，为后期数据可视化做准备
 ```
  public static class WMap extends Mapper<LongWritable, Text, Text,Sun>{
@@ -87,7 +88,7 @@ CREATE TABLE beij (
   --export-dir /weather/beij/ \
   --input-fields-terminated-by "\t"
 ```
-## 数据可视化:
+#### 数据可视化:
 ```
 def data_show(hostname,username,password,database,table_name):
 # 连接数据库
@@ -122,3 +123,74 @@ def data_show(hostname,username,password,database,table_name):
     connection.close()
 ```
 ![image](https://github.com/414818141418181/Bigdata_Weather/assets/128785226/6e725c9c-4368-442b-b8a9-11761cb2dbed)
+### 进阶案例
+* 使用mapreduce取出温度并计算当天的温差
+```
+public class temp {
+    public static class TMap extends Mapper<LongWritable, Text, Text, tem> {
+        @Override
+        protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+            String line = value.toString();
+            String[] data = line.split(",");
+            String high_s = data[2];
+            String low_s = data[3];
+            String ymd = data[4];
+
+            Pattern pattern = Pattern.compile("\\d+"); // 匹配数字的正则表达式
+            Matcher matcher_h = pattern.matcher(high_s);
+            Matcher matcher_l = pattern.matcher(low_s);
+
+            String high1 = "";
+            String low1 = "";
+
+            if (matcher_h.find()) {
+                high1 = matcher_h.group();
+            }
+
+            if (matcher_l.find()) {
+                low1 = matcher_l.group();
+            }
+
+            if (!high1.isEmpty() && !low1.isEmpty()) { // 只处理找到匹配数字的情况
+                LongWritable high = new LongWritable(Long.parseLong(high1));
+                LongWritable low = new LongWritable(Long.parseLong(low1));
+
+                LongWritable differ = new LongWritable(high.get() - low.get());
+                Text k2 = new Text(ymd);
+                tem v2 = new tem(high, low, differ);
+                context.write(k2, v2);
+            }
+        }
+    }
+
+
+    public static class TReduce extends Reducer<Text, tem, Text, tem> {
+        @Override
+        protected void reduce(Text key, Iterable<tem> values, Reducer<Text, tem, Text, tem>.Context context) throws IOException, InterruptedException {
+            for (tem v2 : values) {
+                String high = v2.getHigh().toString() + " \u2103";
+                String low = v2.getLow().toString() + " \u2103";
+                String differ = v2.getDiffer().toString() + " \u2103";
+                context.write(key, new tem(high, low, differ));
+            }
+        }
+    }
+    public static void main(St
+```
+* 以下是处理好的数据
+2023-08-19      35 ℃    24 ℃    11 ℃
+2023-08-20      32 ℃    24 ℃    8 ℃
+2023-08-21      31 ℃    22 ℃    9 ℃
+2023-08-22      32 ℃    23 ℃    9 ℃
+2023-08-23      31 ℃    21 ℃    10 ℃
+2023-08-24      28 ℃    21 ℃    7 ℃
+2023-08-25      30 ℃    21 ℃    9 ℃
+2023-08-26      22 ℃    16 ℃    6 ℃
+2023-08-27      24 ℃    15 ℃    9 ℃
+2023-08-28      28 ℃    17 ℃    11 ℃
+2023-08-29      29 ℃    19 ℃    10 ℃
+2023-08-30      28 ℃    19 ℃    9 ℃
+2023-08-31      30 ℃    19 ℃    11 ℃
+2023-09-01      30 ℃    20 ℃    10 ℃
+2023-09-02      31 ℃    20 ℃    11 ℃
+
