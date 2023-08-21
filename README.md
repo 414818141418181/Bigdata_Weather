@@ -71,6 +71,7 @@ def get_data(city_code):
 2023-09-01      06:09   18:45
 2023-09-02      06:09   18:44
 ```
+* sun类就不再演示，在MapReduce里可以找到源文件
 * 使用sqoop写入本地数据库,先创建数据库以及表
 ```
   CREATE DATABASE weather DEFAULT CHARACTER SET=utf8 DEFAULT COLLATE
@@ -175,9 +176,10 @@ public class temp {
             }
         }
     }
-    public static void main(St
 ```
+* tem类就不再演示，在MapReduce里可以找到源文件
 * 以下是处理好的数据
+```
 2023-08-19      35 ℃    24 ℃    11 ℃
 2023-08-20      32 ℃    24 ℃    8 ℃
 2023-08-21      31 ℃    22 ℃    9 ℃
@@ -193,4 +195,4 @@ public class temp {
 2023-08-31      30 ℃    19 ℃    11 ℃
 2023-09-01      30 ℃    20 ℃    10 ℃
 2023-09-02      31 ℃    20 ℃    11 ℃
-
+```
