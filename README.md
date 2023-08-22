@@ -36,7 +36,7 @@ def get_data(city_code):
 ```
 ### 简单的案例
 #### 数据处理:
-* 使用mapreduce来对数据做一个初级的处理，以日期为key值，为后期数据可视化做准备
+* 使用mapreduce来对数据做一个初级的处理，以日期为key值，取出日落与日出时间，为后期数据可视化做准备
 ```
  public static class WMap extends Mapper<LongWritable, Text, Text,Sun>{
         @Override
@@ -169,7 +169,7 @@ public class temp {
         @Override
         protected void reduce(Text key, Iterable<tem> values, Reducer<Text, tem, Text, tem>.Context context) throws IOException, InterruptedException {
             for (tem v2 : values) {
-                String high = v2.getHigh().toString() + " \u2103";
+                String high = v2.getHigh().toString() + " \u2103";#给每一个数值加上摄氏度的标签
                 String low = v2.getLow().toString() + " \u2103";
                 String differ = v2.getDiffer().toString() + " \u2103";
                 context.write(key, new tem(high, low, differ));
@@ -213,3 +213,4 @@ CREATE TABLE tem (
   --export-dir /weather/temp/ \
   --input-fields-terminated-by "\t" 
 ```
+* 数据可视化,这里便不再演示可视化
