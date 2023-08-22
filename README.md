@@ -83,8 +83,8 @@ CREATE TABLE beij (
  sunset varchar(255)
 );
   sqoop export --connect jdbc:mysql://本机的ip地址:3306/weather?serverTimezone=UTC \
-  --username root \
-  --password 123123 \
+  --username hostname \
+  --password password \
   --table beij  \
   --export-dir /weather/beij/ \
   --input-fields-terminated-by "\t"
@@ -206,9 +206,9 @@ CREATE TABLE tem (
  differ varchar(255)
 );
  
-  sqoop export --connect jdbc:mysql://192.168.45.154:3306/weather?serverTimezone=UTC \
-  --username root \
-  --password 123123 \
+  sqoop export --connect jdbc:mysql://本机ip:3306/weather?serverTimezone=UTC \
+  --username hostname \
+  --password password \
   --table tem  \
   --export-dir /weather/temp/ \
   --input-fields-terminated-by "\t" 
