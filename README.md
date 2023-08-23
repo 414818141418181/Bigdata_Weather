@@ -37,6 +37,7 @@ def get_data(city_code):
 ### 简单的案例
 #### 数据处理:
 * 使用mapreduce来对数据做一个初级的处理，以日期为key值，取出日落与日出时间，为后期数据可视化做准备
+* sun是自定义的一个实体类，用于存放多个数值
 ```
  public static class WMap extends Mapper<LongWritable, Text, Text,Sun>{
         @Override
@@ -54,7 +55,32 @@ def get_data(city_code):
                 context.write(k2, v2);
             }
         }
-    } 
+    }
+public class Sun implements Writable {
+    String sunrise;
+    String sunset;
+
+    public Sun() {
+        // 无参构造函数
+    }
+
+    public Sun(String sunrise, String sunset) {
+        this.sunrise =sunrise;
+        this.sunset = sunset;
+    }
+
+    public void write(DataOutput dataOutput) throws IOException {
+        dataOutput.writeUTF(sunrise);
+        dataOutput.writeUTF(sunset);
+    }
+    @Override
+    public void readFields(DataInput dataInput) throws IOException {
+        sunrise = dataInput.readUTF();
+        sunset = dataInput.readUTF();
+    }
+    public String toString() {
+        return sunrise+ "\t" +sunset;
+    }
 2023-08-19      06:04   18:56
 2023-08-20      06:05   18:55
 2023-08-21      06:05   18:54
@@ -125,7 +151,7 @@ def data_show(hostname,username,password,database,table_name):
 ```
 ![image](https://github.com/414818141418181/Bigdata_Weather/assets/128785226/6e725c9c-4368-442b-b8a9-11761cb2dbed)
 ### 进阶案例
-* 使用mapreduce取出温度并计算当天的温差
+* 使用mapreduce取出温度并计算当天的温差，同样tem是自定义类
 ```
 public class temp {
     public static class TMap extends Mapper<LongWritable, Text, Text, tem> {
@@ -156,7 +182,7 @@ public class temp {
                 LongWritable high = new LongWritable(Long.parseLong(high1));
                 LongWritable low = new LongWritable(Long.parseLong(low1));
 
-                LongWritable differ = new LongWritable(high.get() - low.get());
+                LongWritable differ = new LongWritable(high.get() - low.get());//计算温差
                 Text k2 = new Text(ymd);
                 tem v2 = new tem(high, low, differ);
                 context.write(k2, v2);
@@ -176,8 +202,60 @@ public class temp {
             }
         }
     }
+public class tem implements Writable {
+    private LongWritable high;
+    private LongWritable low;
+    private LongWritable differ;
+    private String high_t;
+    private String low_t;
+    private String differ_t;
+
+    public tem() {
+
+    }
+
+    public tem(LongWritable high, LongWritable low, LongWritable differ) {
+        this.high = high;
+        this.low = low;
+        this.differ = differ;
+        this.high_t = "";
+        this.low_t = "";
+        this.differ_t = "";
+    }
+
+    public tem(String high_t, String low_t, String differ_t) {
+        this.high_t = high_t;
+        this.low_t = low_t;
+        this.differ_t = differ_t;
+    }
+
+    public void write(DataOutput dataOutput) throws IOException {
+        dataOutput.writeLong(high.get());
+        dataOutput.writeLong(low.get());
+        dataOutput.writeLong(differ.get());
+        dataOutput.writeUTF(high_t);
+        dataOutput.writeUTF(low_t);
+        dataOutput.writeUTF(differ_t);
+    }
+
+    @Override
+    public void readFields(DataInput dataInput) throws IOException {
+        this.high = new LongWritable();
+        this.high.readFields(dataInput);
+        this.low = new LongWritable();
+        this.low.readFields(dataInput);
+        this.differ = new LongWritable();
+        this.differ.readFields(dataInput);
+        this.high_t = dataInput.readUTF();
+        this.low_t = dataInput.readUTF();
+        this.differ_t = dataInput.readUTF();
+    }
+
+    public String toString() {
+        return high_t+ "\t" +low_t+ "\t" +differ_t;
+    }
+
 ```
-* tem类就不再演示，在MapReduce里可以找到源文件
 * 以下是处理好的数据
 ```
 2023-08-19      35 ℃    24 ℃    11 ℃
