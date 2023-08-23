@@ -37,6 +37,55 @@ def get_data(city_code):
 ### 简单的案例
 #### 数据处理:
 * 使用mapreduce来对数据做一个初级的处理，以日期为key值，取出日落与日出时间，为后期数据可视化做准备
+* 在使用MapReduce时需要导入对应的依赖
+```
+ <dependencies>
+        <!--hadoop-client依赖-->
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-client</artifactId>
+            <version>3.2.1</version>
+            <!--表示只在编译的时候使用这个依赖,在执行以及打包的时候都不使用-->
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.60</version>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.cetc.reimbursement.View.reimture</mainClass>
+                        </manifest>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.0.2</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+
+    </build>
+```
 * sun是自定义的一个实体类，用于存放多个数值
 ```
  public static class WMap extends Mapper<LongWritable, Text, Text,Sun>{
