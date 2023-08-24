@@ -412,3 +412,31 @@ CREATE TABLE tem (
 ```
 * 以下是处理好的数据，这里便截图演示
   ![image](https://github.com/414818141418181/Bigdata_Weather/assets/128785226/f7c8664e-0e0c-4348-aef0-2679a8182c29)
+* 接下来我们在hive里创建数据库与表
+```
+create database Test;
+
+use Test;
+
+create  external table beij(
+    ymd string,
+    high string,
+    low string,
+    week string,
+    sunrise string,
+    sunset string,
+    aqi int,
+    fx string,
+    fl string,
+    type string,
+    notice string)
+row format delimited fields terminated by '\t'
+collection items terminated by ' '
+stored as textfile;
+
+show tables ;
+```
+* 这里推荐使用DG，原生hive不太好用，可以看见表已经被创建出来
+* 这里我们创建外部表，实际开发中都使用外部表，防止误操作
+![image](https://github.com/414818141418181/Bigdata_Weather/assets/128785226/aebe1a83-b309-4235-a471-4fe38d5326ec)
+
