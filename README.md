@@ -341,3 +341,74 @@ CREATE TABLE tem (
   --input-fields-terminated-by "\t" 
 ```
 * 数据可视化,这里便不再演示可视化
+## Hive数据分析
+### 数据预处理
+* 先将weather.csv表格清洗，去除不必要的值和列名
+```
+   public static class HMap extends Mapper<LongWritable, Text,Text,data>{
+        @Override
+        protected void map(LongWritable key, Text value, Mapper<LongWritable, Text, Text, data>.Context context) throws IOException, InterruptedException {
+            String lane = value.toString();
+            String[] data1 = lane.split(",");
+            if(!key.toString().equals("0")) {
+                String high = data1[2];
+                String low = data1[3];
+                String ymd = data1[4];
+                String week = data1[5];
+                String sunrise = data1[6];
+                String sunset = data1[7];
+                LongWritable aqi = new LongWritable(Long.parseLong(data1[8]));
+                String fx = data1[9];
+                String fl = data1[10];
+                String type = data1[11];
+                String notice = data1[12];
+                Text k2 = new Text(ymd);
+                data v2 = new data(high, low, week, sunrise, sunset, aqi, fx, fl, type, notice);
+                context.write(k2, v2);
+            }
+        }
+   public data(String high,String low,String week,String sunrise,String sunset,LongWritable aqi,String fx,String fl,String type,String notice){
+        this.high = high;
+        this.low = low;
+        this.week = week;
+        this.sunrise = sunrise;
+        this.sunset = sunset;
+        this.aqi = aqi;
+        this.fl = fl;
+        this.fx = fx;
+        this.type = type;
+        this.notice = notice;
+
+    }
+    public void write(DataOutput dataOutput) throws IOException {
+        dataOutput.writeUTF(high);
+        dataOutput.writeUTF(low);
+        dataOutput.writeUTF(week);
+        dataOutput.writeUTF(sunrise);
+        dataOutput.writeUTF(sunset);
+        dataOutput.writeLong(aqi.get());
+        dataOutput.writeUTF(fl);
+        dataOutput.writeUTF(fx);
+        dataOutput.writeUTF(type);
+        dataOutput.writeUTF(notice);
+    }
+    public void readFields(DataInput dataInput) throws IOException {
+        high = dataInput.readUTF();
+        low = dataInput.readUTF();
+        week = dataInput.readUTF();
+        sunrise = dataInput.readUTF();
+        sunset = dataInput.readUTF();
+        this.aqi = new LongWritable();
+        this.aqi.readFields(dataInput);
+        fl = dataInput.readUTF();
+        fx = dataInput.readUTF();
+        type = dataInput.readUTF();
+        notice = dataInput.readUTF();
+    }
+    public String toString() {
+        return high+ "\t" +low+"\t" +week+ "\t" +sunrise+ "\t" + sunset+ "\t" +aqi+ "\t" +fx+ "\t" +fl+ "\t" +type+ "\t" +notice;
+    }
+
+```
+* 以下是处理好的数据，这里便截图演示
+  ![image](https://github.com/414818141418181/Bigdata_Weather/assets/128785226/f7c8664e-0e0c-4348-aef0-2679a8182c29)
