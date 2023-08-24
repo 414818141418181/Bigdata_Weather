@@ -410,9 +410,10 @@ CREATE TABLE tem (
     }
 
 ```
+### 数据分析
 * 以下是处理好的数据，这里便截图演示
   ![image](https://github.com/414818141418181/Bigdata_Weather/assets/128785226/f7c8664e-0e0c-4348-aef0-2679a8182c29)
-* 接下来我们在hive里创建数据库与表
+#### 接下来我们在hive里创建数据库与表
 ```
 create database Test;
 
@@ -439,4 +440,59 @@ show tables ;
 * 这里推荐使用DG，原生hive不太好用，可以看见表已经被创建出来
 * 这里我们创建外部表，实际开发中都使用外部表，防止误操作
 ![image](https://github.com/414818141418181/Bigdata_Weather/assets/128785226/aebe1a83-b309-4235-a471-4fe38d5326ec)
+#### 这里看到，我们已经成功的把数据导入到hive数仓中，这是我Mapreduce输出数据的路径，实际使用要根据自己来修改
+* 注意事项：在实际的开发中，不能直接查询表数据，否则会导致数据过大读取导致机器崩溃，建议加上limit限制查询的行数
+```
+load data inpath "/weather/hive/*" into table beij;
+select * from beij;
+```
+  ![image](https://github.com/414818141418181/Bigdata_Weather/assets/128785226/461520ba-df8b-4dc5-b0b0-b4b37413b2e4)
+* 在查询过程中也可以看得出来，查询过程也是一个mapreduce程序
+  ![image](https://github.com/414818141418181/Bigdata_Weather/assets/128785226/f3de9f43-1e51-4cf6-80f0-ce9f0feb9d5d)
+
+#### 筛选出aqi最高的top5
+* 执行过程中较为缓慢，耐心等待
+  ![image](https://github.com/414818141418181/Bigdata_Weather/assets/128785226/75fef72e-1c2e-4ad3-afc6-dc0eebdae7f0)
+```
+select ymd,aqi
+from beij
+order by aqi desc
+limit 5;
+```
+#### 统计各个风向的次数
+```
+select fx,count(*)
+from beij
+group by fx;
+```
+![image](https://github.com/414818141418181/Bigdata_Weather/assets/128785226/95f23fb0-fe88-4394-b604-fd7461b6a82a)
+
+#### 查询每个星期几的平均最高气温与最低气温
+```
+select week,
+avg(regexp_extract(high, '[0-9]+', 0)) as avg_high,
+avg(regexp_extract(low, '[0-9]+', 0)) as avg_low
+from beij
+group by week;
+```
+![image](https://github.com/414818141418181/Bigdata_Weather/assets/128785226/7c934fc5-33e7-4f22-b97d-c8ad84476a70)
+#### 查询温差与天气之间的关系
+```
+select ymd,
+       high,
+       low,
+       type,
+       cast(t_high AS int) - cast(t_low AS int) as avg#转换为整型
+from (
+    select ymd,
+    regexp_extract(high, '[0-9]+', 0) as t_high,#正则表达式取出数值
+    regexp_extract(low, '[0-9]+', 0) as t_low,
+    high,low,type
+    FROM beij
+) subquery
+group by  ymd,high,low,type,t_high,t_low
+order by avg DESC
+limit 10;
+```
+![image](https://github.com/414818141418181/Bigdata_Weather/assets/128785226/7fbdb150-34e7-470d-8e31-ec7ae1ecf553)
 
